@@ -175,9 +175,3 @@ class MissionDB:
             cursor.close()
             connection.close()
             logger.debug("The connections are closed.")
-
-    
-
-
-
-
