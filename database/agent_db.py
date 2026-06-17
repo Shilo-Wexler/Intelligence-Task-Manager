@@ -80,7 +80,6 @@ class AgentDB:
     def deactivate_agent(agent_id: int) -> None:
         connection = ConnectionDB.get_connection()
         cursor = connection.cursor(dictionary=True)
-
         try:
             cursor.execute("UPDATE agents SET is_active = FALSE  WHERE id = %s", (agent_id,))
             connection.commit()

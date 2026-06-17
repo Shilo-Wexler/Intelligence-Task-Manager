@@ -20,7 +20,7 @@ CREATE_MISSIONS_TABLE = """
     difficulty INT NOT NULL,
     importance INT NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'NEW',
-    risk_level VARCHAR(50), 
+    risk_level VARCHAR(50) NOT NULL, 
     assigned_agent_id INT DEFAULT NULL,
     FOREIGN KEY (assigned_agent_id) REFERENCES agents(id) ON DELETE SET NULL
     )
