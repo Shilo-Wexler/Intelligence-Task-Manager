@@ -8,6 +8,7 @@ logger = get_logger(__name__)
 class AgentNotFoundError(Exception):
     pass
 
+
 class AgentDB:
     @staticmethod
     def get_all_agents() -> list[dict]:
@@ -21,6 +22,7 @@ class AgentDB:
             cursor.close()
             connection.close()
             logger.debug("The connections are closed.") 
+
 
     @staticmethod
     def get_agent_by_id(agent_id) -> dict:
@@ -56,13 +58,11 @@ class AgentDB:
             connection.close()
             logger.debug("The connections are closed.") 
 
-
         
     @staticmethod
-    def update_agent(agent_id: int, data: dict) -> bool:
+    def update_agent(agent_id: int, data: dict) -> None:
         connection = ConnectionDB.get_connection()
         cursor = connection.cursor(dictionary=True)
-
         try:
             for k, v in data.items():
                 quary = f"UPDATE agents SET {k} = %s WHERE id = %s"
@@ -70,14 +70,14 @@ class AgentDB:
             connection.commit()
             if  cursor.rowcount < 0:
                 raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
-            return True
         finally:
             cursor.close()
             connection.close()
             logger.debug("The connections are closed.")
-    
+
+
     @staticmethod
-    def deactivate_agent(agent_id: int) -> bool:
+    def deactivate_agent(agent_id: int) -> None:
         connection = ConnectionDB.get_connection()
         cursor = connection.cursor(dictionary=True)
 
@@ -86,7 +86,6 @@ class AgentDB:
             connection.commit()
             if  cursor.rowcount < 0:
                 raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
-            return True
         finally:
             cursor.close()
             connection.close()
@@ -94,32 +93,28 @@ class AgentDB:
     
 
     @staticmethod
-    def increment_completed(agent_id: int) -> bool:
+    def increment_completed(agent_id: int) -> None:
         connection = ConnectionDB.get_connection()
         cursor = connection.cursor(dictionary=True)
-
         try:
             cursor.execute("UPDATE agents SET completed_missions = completed_missions + 1  WHERE id = %s", (agent_id,))
             connection.commit()
             if  cursor.rowcount < 0:
                 raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
-            return True
         finally:
             cursor.close()
             connection.close()
             logger.debug("The connections are closed.")
     
 
-    def increment_failed(agent_id: int) -> bool:
+    def increment_failed(agent_id: int) -> None:
         connection = ConnectionDB.get_connection()
         cursor = connection.cursor(dictionary=True)
-
         try:
             cursor.execute("UPDATE agents SET failed_missions = failed_missions + 1  WHERE id = %s", (agent_id,))
             connection.commit()
             if  cursor.rowcount < 0:
                 raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
-            return True
         finally:
             cursor.close()
             connection.close()
