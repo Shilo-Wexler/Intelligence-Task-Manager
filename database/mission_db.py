@@ -20,13 +20,12 @@ class MissionDB:
 
         logger.debug("Starting the process of adding a mission with data: %s", data)
         try:
-            level_risk = data.get('difficulty') * 2 + data.get('importance')
             cursor.execute("""
                 INSERT INTO missions 
                 (title, description, location, difficulty, importance, risk_level)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 """,
-                tuple(data.values()) + (level_risk,)
+                tuple(data.values())
             )
             connection.commit()
             agent_id = cursor.lastrowid
@@ -152,6 +151,23 @@ class MissionDB:
             cursor.execute("""
                 COUNT(*) AS total_missions FROM missions
                 WHERE status = %s OR status = %s
+                """, ('ASSIGNED', 'IN_PROGRESS')
+            )
+            return cursor.fetchone().get('total_missions')
+        finally:
+            cursor.close()
+            connection.close()
+            logger.debug("The connections are closed.")
+    
+
+    @staticmethod
+    def count_critical_missions() -> int:
+        connection = ConnectionDB.get_connection()
+        cursor = connection.cursor(dictionary=True)
+        try:
+            cursor.execute("""
+                COUNT(*) AS total_missions FROM missions
+                WHERE risk_level = CRITICAL 
                 """, ('ASSIGNED', 'IN_PROGRESS')
             )
             return cursor.fetchone().get('total_missions')

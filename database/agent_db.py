@@ -105,7 +105,7 @@ class AgentDB:
             connection.close()
             logger.debug("The connections are closed.")
     
-
+    @staticmethod
     def increment_failed(agent_id: int) -> None:
         connection = ConnectionDB.get_connection()
         cursor = connection.cursor(dictionary=True)
@@ -146,16 +146,29 @@ class AgentDB:
             logger.debug("The connections are closed.")
     
 
+    @staticmethod
     def count_active_agents() -> int:
         connection = ConnectionDB.get_connection()
         cursor = connection.cursor(dictionary=True)
-
         try:
-            cursor.execute("SELECT COUNT(*) AS total_active FROM agents WHERE is_active = TRUE;")
+            cursor.execute("SELECT COUNT(*) AS total_active FROM agents WHERE is_active = TRUE")
             return cursor.fetchone().get('total_active')
-        
         finally:
             cursor.close()
             connection.close()
             logger.debug("The connections are closed.")
+
+
+    @staticmethod
+    def get_top_agent() -> dict:
+        connection = ConnectionDB.get_connection()
+        cursor = connection.cursor(dictionary=True)
+        try:
+            cursor.execute("SELECT * FROM agents ORDER BY completed_missions DESC LIMIT 1")
+            return cursor.fetchone()
+        finally:
+            cursor.close()
+            connection.close()
+            logger.debug("The connections are closed.")
+
     
