@@ -68,7 +68,9 @@ class AgentDB:
                 quary = f"UPDATE agents SET {k} = %s WHERE id = %s"
                 cursor.execute(quary, (v, agent_id))
             connection.commit()
-            return cursor.rowcount > 0
+            if  cursor.rowcount < 0:
+                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
+            return True
         finally:
             cursor.close()
             connection.close()
@@ -82,7 +84,9 @@ class AgentDB:
         try:
             cursor.execute("UPDATE agents SET is_active = FALSE  WHERE id = %s", (agent_id,))
             connection.commit()
-            return cursor.rowcount > 0
+            if  cursor.rowcount < 0:
+                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
+            return True
         finally:
             cursor.close()
             connection.close()
@@ -97,7 +101,9 @@ class AgentDB:
         try:
             cursor.execute("UPDATE agents SET completed_missions = completed_missions + 1  WHERE id = %s", (agent_id,))
             connection.commit()
-            return cursor.rowcount > 0
+            if  cursor.rowcount < 0:
+                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
+            return True
         finally:
             cursor.close()
             connection.close()
@@ -111,7 +117,9 @@ class AgentDB:
         try:
             cursor.execute("UPDATE agents SET failed_missions = failed_missions + 1  WHERE id = %s", (agent_id,))
             connection.commit()
-            return cursor.rowcount > 0
+            if  cursor.rowcount < 0:
+                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
+            return True
         finally:
             cursor.close()
             connection.close()
@@ -126,6 +134,10 @@ class AgentDB:
         try:
             cursor.execute("SELECT completed_missions, failed_missions FROM agents WHERE id = %s", (agent_id,))
             result = cursor.fetchone()
+
+            if  result is None:
+                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
+        
             completed = result.get('completed_missions')
             failed = result.get('failed_missions')
             total_missions = completed + failed
