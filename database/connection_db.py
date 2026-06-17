@@ -39,8 +39,15 @@ class ConnectionDB:
             logger.critical("Failed to establish connection: %s", e)
             raise ConnCreateError()
         cursor = connection.cursor()
-        cursor.execute("CREATE DATABASE IF NOT EXISTS Intelligence_db")
-        logger.info("The Intelligence_db database was successfully created.")
+        try:
+            cursor.execute("CREATE DATABASE IF NOT EXISTS Intelligence_db")
+            logger.info("The Intelligence_db database was successfully created.")
+            connection.commit()
+        finally:
+            cursor.close()
+            connection.close()
+            logger.debug("The connections are closed.")
+
     
 
 
