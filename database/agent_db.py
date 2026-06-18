@@ -1,174 +1,103 @@
-from database.connection_db import ConnectionDB
+from database.executes_queries import QueryExecute
 from logger import get_logger
 
 
 logger = get_logger(__name__)
-
-
-class AgentNotFoundError(Exception):
-    pass
+executer = QueryExecute()
 
 
 class AgentDB:
     @staticmethod
-    def get_all_agents() -> list[dict]:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
+    def create_agent(data: dict) -> int:
+        logger.debug("Starting the process of adding an agent with data: %s", data)
+        return executer.create_query(
+            "INSERT INTO agents (name, specialty, agent_rank) VALUES (%s, %s, %s)",
+            tuple(data.values())
+        )
 
-        try:
-            cursor.execute("SELECT * FROM agents")
-            return cursor.fetchall()
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.") 
+    @staticmethod
+    def get_all_agents() -> list[dict]:
+        return executer.get_query("SELECT * FROM agents")
 
 
     @staticmethod
     def get_agent_by_id(agent_id) -> dict:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
-
-        try:
-            cursor.execute("SELECT * FROM agents WHERE id = %s",( agent_id,))
-            agent = cursor.fetchone()
-            if not agent:
-                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
-            return agent
-            
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.")
-
-
-    @staticmethod
-    def create_agent(data: dict) -> dict:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
-
-        logger.debug("Starting the process of adding an agent with data: %s", data)
-        try:
-            cursor.execute("INSERT INTO agents (name, specialty, agent_rank) VALUES (%s, %s, %s)", tuple(data.values()))
-            connection.commit()
-            agent_id = cursor.lastrowid
-            return AgentDB.get_agent_by_id(agent_id)
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.") 
+        return executer.get_query(
+            "SELECT * FROM agents WHERE id = %s",
+            ( agent_id,),
+            one=True
+        )
 
         
     @staticmethod
-    def update_agent(agent_id: int, data: dict) -> None:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
-        try:
-            for k, v in data.items():
-                quary = f"UPDATE agents SET {k} = %s WHERE id = %s"
-                cursor.execute(quary, (v, agent_id))
-            connection.commit()
-            if  cursor.rowcount < 0:
-                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.")
+    def update_agent(agent_id: int, data: dict) -> bool:
+        is_updated = 0
+        for k, v in data.items():
+            is_updated += executer.update_query(
+                f"UPDATE agents SET {k} = %s WHERE id = %s",
+                (v, agent_id)
+            )    
+        return is_updated > 0
 
 
     @staticmethod
-    def deactivate_agent(agent_id: int) -> None:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
-        try:
-            cursor.execute("UPDATE agents SET is_active = FALSE  WHERE id = %s", (agent_id,))
-            connection.commit()
-            if  cursor.rowcount < 0:
-                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.")
+    def deactivate_agent(agent_id: int) -> bool:
+        return executer.update_query(
+            "UPDATE agents SET is_active = FALSE  WHERE id = %s",
+            (agent_id,)
+        )
     
 
     @staticmethod
-    def increment_completed(agent_id: int) -> None:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
-        try:
-            cursor.execute("UPDATE agents SET completed_missions = completed_missions + 1  WHERE id = %s", (agent_id,))
-            connection.commit()
-            if  cursor.rowcount < 0:
-                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.")
-    
+    def increment_completed(agent_id: int) -> bool:
+        return executer.update_query(
+            "UPDATE agents SET completed_missions = completed_missions + 1  WHERE id = %s",
+            (agent_id,)
+        )
+
+
     @staticmethod
-    def increment_failed(agent_id: int) -> None:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
-        try:
-            cursor.execute("UPDATE agents SET failed_missions = failed_missions + 1  WHERE id = %s", (agent_id,))
-            connection.commit()
-            if  cursor.rowcount < 0:
-                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.")
+    def increment_failed(agent_id: int) -> bool:
+        return executer.update_query(
+            "UPDATE agents SET failed_missions = failed_missions + 1  WHERE id = %s",
+            (agent_id,)
+        )
     
 
     @staticmethod
-    def get_agent_performance(agent_id: int) -> dict:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
-
-        try:
-            cursor.execute("SELECT completed_missions, failed_missions FROM agents WHERE id = %s", (agent_id,))
-            result = cursor.fetchone()
-
-            if  result is None:
-                raise AgentNotFoundError(f"No agent exists with ID: {agent_id}")
+    def get_agent_performance(agent_id: int) -> dict | None:
+        agent_ditails = executer.get_query(
+            "SELECT completed_missions, failed_missions FROM agents WHERE id = %s",
+            (agent_id,),
+            one=True
+        )
+        if agent_ditails is None:
+            return None
         
-            completed = result.get('completed_missions')
-            failed = result.get('failed_missions')
-            total_missions = completed + failed
-            return {
-                'completed': result.get('completed_missions'),
-                'failed' : result.get('failed_missions'),
-                'success_rate': round((completed / total_missions) * 100, 2)
-            }
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.")
+        completed = agent_ditails.get('completed_missions')
+        failed = agent_ditails.get('failed_missions')
+        total_missions = completed + failed
+
+        return {
+            'completed': completed,
+            'failed': failed,
+            'total': total_missions,
+            'success_rate': round((completed / total_missions) * 100, 2),
+        }
     
 
     @staticmethod
     def count_active_agents() -> int:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
-        try:
-            cursor.execute("SELECT COUNT(*) AS total_active FROM agents WHERE is_active = TRUE")
-            return cursor.fetchone().get('total_active')
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.")
+        return executer.get_query(
+            "SELECT COUNT(*) AS total_active FROM agents WHERE is_active = TRUE",
+            one=True
+        ).get('total_active')
 
 
     @staticmethod
     def get_top_agent() -> dict:
-        connection = ConnectionDB.get_connection()
-        cursor = connection.cursor(dictionary=True)
-        try:
-            cursor.execute("SELECT * FROM agents ORDER BY completed_missions DESC LIMIT 1")
-            return cursor.fetchone()
-        finally:
-            cursor.close()
-            connection.close()
-            logger.debug("The connections are closed.")
+        return executer.get_query(
+            "SELECT * FROM agents ORDER BY completed_missions DESC LIMIT 1",
+            one=True
+        )
 
-    
