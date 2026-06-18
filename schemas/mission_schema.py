@@ -7,10 +7,8 @@ class NewMission(BaseModel):
     title: str
     description: str
     location: str
-    difficulty: str
-    importance: int = Field(..., le=1, ge=10)
-    location: int = Field(..., le=1, ge=10)
-
+    difficulty: int = Field(..., ge=1, le=10)
+    importance: int = Field(..., ge=1, le=10)
 
 class UpdateAgent(BaseModel):
     title: str | None = None
@@ -18,5 +16,4 @@ class UpdateAgent(BaseModel):
     location: str | None = None
     difficulty: str | None = None
     importance: int | None = None
-    location: int  | None = None
 

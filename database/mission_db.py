@@ -1,7 +1,6 @@
 from mysql.connector import IntegrityError
 
 from database.executes_queries import QueryExecute
-from database.agent_db import AgentNotFoundError
 from logger import get_logger
 
 
