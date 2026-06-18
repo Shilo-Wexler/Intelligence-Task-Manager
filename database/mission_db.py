@@ -97,6 +97,18 @@ class MissionDB:
         ).get('total_missions')
     
 
+
+    @staticmethod
+    def count_open_missions_per_agent(agent_id: int) -> int:
+        return executer.get_query( """
+            COUNT(*) AS total_missions FROM missions
+            WHERE status = %s OR status = %s AND id = %s
+            """,
+            ('ASSIGNED', 'IN_PROGRESS', agent_id),
+            one=True
+        ).get('total_missions')
+    
+
     @staticmethod
     def count_critical_missions() -> int:
         return executer.get_query("""

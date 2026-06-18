@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 
 from logger import get_logger
+from database.connection_db import ConnectionDB
 from routes import agent_routes, mission_routes, report_routes
 
 
@@ -28,6 +29,8 @@ app.include_router(
 
 if __name__ == '__main__':
     try:
+        ConnectionDB.create_database()
+        ConnectionDB.create_tables()
         uvicorn.run('main:app', host='localhost', port=8000, reload=True)
     except Exception as e:
         logger.critical(f'Server upload failure: {e}')

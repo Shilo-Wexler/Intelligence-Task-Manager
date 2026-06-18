@@ -1,7 +1,9 @@
 import database.connection_db as conn
 from database.agent_db import AgentDB
-from database.mission_db import MissionDB
+from database.executes_queries import QueryExecute
 
-print(MissionDB.get_mission_by_id(3))
 
-print(MissionDB.assign_mission(3,3))
+a = QueryExecute()
+print(AgentDB.create_agent({"name": "shimon", "specialty":"nothing", "agent_rank": "Junior"}))
+print(a.get_query("SELECT *  FROM agents WHERE id = 3",one=True))
+print("result", AgentDB.get_all_agents())
