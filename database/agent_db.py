@@ -12,7 +12,7 @@ class AgentDB:
         logger.debug("Starting the process of adding an agent with data: %s", data)
         return executer.create_query(
             "INSERT INTO agents (name, specialty, agent_rank) VALUES (%s, %s, %s)",
-            tuple(data.values())
+            (data.get('name'), data.get('specialty'), data.get('agent_rank'))
         )
 
     @staticmethod
@@ -77,12 +77,14 @@ class AgentDB:
         completed = agent_ditails.get('completed_missions')
         failed = agent_ditails.get('failed_missions')
         total_missions = completed + failed
-
+        success_rate = 100
+        if total_missions > 0:
+            success_rate = (completed / total_missions) * 100
         return {
             'completed': completed,
             'failed': failed,
             'total': total_missions,
-            'success_rate': round((completed / total_missions) * 100, 2),
+            'success_rate': round(success_rate, 2),
         }
     
 

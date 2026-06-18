@@ -29,7 +29,7 @@ class QueryExecute:
         try:
             cursor.execute(query, params)
             self.connection.commit()
-            return cursor.rowcount < 0
+            return cursor.rowcount > 0
         finally:
             cursor.close()
             logger.debug("The cursor is closed.") 

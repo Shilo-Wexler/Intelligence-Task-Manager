@@ -29,7 +29,7 @@ def is_active_agent(agent: dict) -> bool:
 
 
 def agent_has_more_than_3_missions(agent: dict) -> bool:
-    MissionDB.count_open_missions_per_agent(agent.get('id')) >= 3
+    return MissionDB.count_open_missions_per_agent(agent.get('id')) >= 3
 
 
 def is_risk_level_match_role(agent: dict, mission: dict) -> bool:
@@ -45,7 +45,7 @@ def is_mission_status_allow_finish(mission: dict) -> bool:
     return mission.get('status') == 'IN_PROGRESS'
 
 
-def is_miision_can_by_canceled(mission: dict) -> bool:
+def is_mission_can_be_canceled(mission: dict) -> bool:
     return mission.get('status') in {'ASSIGNED', 'NEW'}
     
 

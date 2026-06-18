@@ -20,7 +20,10 @@ class MissionDB:
             """ INSERT INTO missions
                 (title, description, location, difficulty, importance, risk_level)
                 VALUES (%s, %s, %s, %s, %s, %s)
-                """, tuple(data.values())
+                """,(
+                    data.get('title'), data.get('description'), data.get('location'),
+                    data.get('difficulty'), data.get('importance'), data.get('risk_level')
+                )
         )
 
 
@@ -61,10 +64,10 @@ class MissionDB:
     
     @staticmethod
     def get_open_missions_by_agent(agent_id: int) -> list[dict]:
-        executer.get_query(
+        return executer.get_query(
             """SELECT * FROM missions
-            WHERE assigned_agent_id = %s AND status = %s OR status = %s""",
-             (agent_id, 'ASSIGNED', 'IN_PROGRESS')
+            WHERE assigned_agent_id = %s AND status IN (ASSIGNED, IN_PROGRESS)""",
+             (agent_id,)
         )
 
     
@@ -114,7 +117,7 @@ class MissionDB:
         return executer.get_query("""
             COUNT(*) AS total_missions FROM missions
             WHERE risk_level = CRITICAL 
-            """, ('ASSIGNED', 'IN_PROGRESS'),
+            """,
             one=True
         ).get('total_missions')
         

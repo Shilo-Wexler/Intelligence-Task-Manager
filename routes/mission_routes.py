@@ -1,14 +1,15 @@
 from fastapi import APIRouter
 
 from logger import get_logger
+from schemas.mission_schema import UpdateAgent, NewMission
 
 
 logger = get_logger(__name__)
 router = APIRouter()
 
 
-@router.post('')
-def add_mission(body):
+@router.post('', status_code=201)
+def add_mission(body: NewMission):
     pass
 
 
@@ -27,7 +28,7 @@ def assign_mission(mission_id: int, agent_id: int):
     pass
 
 
-@router.put('/{mission_id}/start ')
+@router.put('/{mission_id}/start')
 def start_mission(mission_id: int):
     pass
 

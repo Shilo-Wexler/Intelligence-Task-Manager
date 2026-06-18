@@ -33,7 +33,6 @@ class ConnectionDB:
                 host='127.0.0.1',
                 user='root',
                 password='1234',
-                database='Intelligence_db',
             )
         except Exception as e:
             logger.critical("Failed to establish connection: %s", e)
