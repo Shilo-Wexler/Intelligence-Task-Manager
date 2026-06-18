@@ -62,8 +62,11 @@ def set_mission_to_complete(mission_id: int):
 def set_mission_to_fail(mission_id: int):
     try:
         mission_service.set_mission_to_fail(mission_id)
+
     except MissionNotFoundError as e:
         raise HTTPException(status_code=404, detail=f"{e}")
+    except MissionCanNotBeExcError as e:
+        raise HTTPException(status_code=400, detail=f"{e}")
 
 
 

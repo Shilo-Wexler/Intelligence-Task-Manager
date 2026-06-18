@@ -76,6 +76,8 @@ def set_mission_to_fail(mission_id: int):
     mission = MissionDB.get_mission_by_id(mission_id)
     if not mission:
         raise MissionNotFoundError()
+    if not rules.is_mission_status_allow_finish(mission):
+        raise MissionCanNotBeExcError
     agent_id = mission.get('assigned_agent_id')
     MissionDB.update_mission_status(mission_id, 'FAIL')
     AgentDB.increment_failed(agent_id)
