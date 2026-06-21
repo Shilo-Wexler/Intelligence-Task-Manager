@@ -16,7 +16,7 @@ def add_agent(body: NewAgent):
     try:
         agent = body.model_dump()
         logger.info("add agent with ditailes %s", body)
-        return agent_service.add_agent(body)
+        return agent_service.add_agent(agent)
     except AgentNotFoundError as e:
         logger.info(e)
         raise HTTPException(status_code=404, detail=f"{e}")
@@ -57,7 +57,7 @@ def update_agent_data(agent_id: int, body: UpdateAgent):
     try:
         detail = body.model_dump(exclude_unset=True)
         logger.info("searching for agent id: %s for updating %s", agent_id, body)
-        agent_service.update_agent_data(agent_id, body)
+        agent_service.update_agent_data(agent_id, detail)
         logger.info("agent updated successfully")
     except AgentNotFoundError as e:
         logger.info(e)
