@@ -91,7 +91,7 @@ class MissionDB:
     @staticmethod
     def count_open_missions() -> int:
         return executer.get_query( """
-            COUNT(*) AS total_missions FROM missions
+            SELECT COUNT(*) AS total_missions FROM missions
             WHERE status = %s OR status = %s
             """,
             ('ASSIGNED', 'IN_PROGRESS'),
@@ -103,10 +103,10 @@ class MissionDB:
     @staticmethod
     def count_open_missions_per_agent(agent_id: int) -> int:
         return executer.get_query( """
-            COUNT(*) AS total_missions FROM missions
-            WHERE status = %s OR status = %s AND id = %s
+            SELECT COUNT(*) AS total_missions FROM missions
+            WHERE assigned_agent_id = %s AND status IN (%s, %s)
             """,
-            ('ASSIGNED', 'IN_PROGRESS', agent_id),
+            (agent_id, 'ASSIGNED', 'IN_PROGRESS'),
             one=True
         ).get('total_missions')
     
